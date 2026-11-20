@@ -1,0 +1,105 @@
+================================================================================
+          SHOULDER SURFING DETECTOR (SSD) - COMPLETE GUIDE & INSTRUCTIONS
+================================================================================
+
+Yeh guide aapko batayegi ke:
+1. Owner Face kaise Register (Enroll) karna hai.
+2. 1-Click se app kaise chalani hai.
+3. Sir ko Demo video mein kya kya dikhana hai.
+
+
+================================================================================
+1. OWNER FACE REGISTER (ENROLL) KAISE KAREIN?
+================================================================================
+
+Step 1:
+-------
+PowerShell ya Command Prompt kholein aur yeh command run karein:
+
+    cd "d:\Projects\CMIT\ssd\ssd_phase4\ssd"
+    .\.venv\Scripts\python.exe main.py --enroll
+
+Step 2:
+-------
+- Camera ke samne akele baithein (frame mein koi doosra shakhs na ho).
+- Screen ki taraf dekhein.
+- Screen par "Sample accepted (1/20 ... 20/20)" show hoga.
+- Dheere-dheere apna sir halka sa left/right hilayein taake alag alag angle 
+  ke face vectors capture ho sakein.
+- 20 samples complete hote hi encrypted profile automatically save ho jayegi.
+
+Step 3:
+-------
+"config.yaml" file ko Notepad mein kholein.
+Line number ~107 par "identity:" section milega.
+Usme "enabled: false" ko badal kar "enabled: true" kar dein:
+
+    identity:
+      enabled: true
+
+(Bas! Ab aap registered owner ban chuke hain. Koi doosra shakhs aayega 
+to system usko Intruder samjhega).
+
+* Agar kabhi registered face delete karna ho to command:
+    .\.venv\Scripts\python.exe main.py --forget-owner
+
+
+================================================================================
+2. BINA TERMINAL KE RUN KAISE KAREIN (1-CLICK RUNNERS)
+================================================================================
+
+Isi folder mein 2 tayyar files rakhi hain:
+
+A) "run_gui.bat"  (Double-Click karein)
+   - Camera window khul jayegi.
+   - Screen par Green (Owner) aur Red (Intruder) box dikhenge.
+   - Band karne ke liye keyboard par 'q' dabayein.
+
+B) "run_background.bat"  (Double-Click karein)
+   - Yeh background service hai, koi black window nahi khulegi.
+   - Taskbar (System Tray) ke paas icon ban kar aayega.
+   - Pura system background mein protected rahega.
+
+TIP: In dono files par Right-Click karke "Send to -> Desktop (create shortcut)" 
+kar lein taake Desktop se direct chala sakein.
+
+
+================================================================================
+3. SIR KO DEMO VIDEO MEIN KYA DIKHANA HAI?
+================================================================================
+
+Video flow (2 se 3 minute):
+
+1. Normal View:
+   - "run_gui.bat" chalayein.
+   - Camera mein akele baithein -> Face par GREEN box aayega (Owner).
+   - State "SECURE" dikhegi.
+   - Keyboard par 'd' dabayein taake debug info (yaw angle, similarity) dikhe.
+
+2. Intruder Detection:
+   - Apne peeche kisi dost ya doosre bande ko khada karein.
+   - Jaise hi wo screen ki taraf dekhega, uspe RED box aayega (Intruder).
+   - State "SUSPECT" -> "WARNING" ho jayegi.
+
+3. Live Actions (Toast -> Blur -> Lock Screen):
+   - Command: .\.venv\Scripts\python.exe main.py --mode gui --actions on
+   - Dikhayein ke intruder aane par:
+     a) Pehle Windows Notification (Toast) aayega: "Privacy warning".
+     b) Phir Screen Blur ho jayegi taake data na dikhe.
+     c) Phir Windows Auto-Lock (Win+L) ho jayegi!
+
+4. Owner Enrollment:
+   - Dikhayein ke kaise 'main.py --enroll' se bina photo save kiye 
+     encrypted face embeddings ke zariye registered owner pehchana jata hai.
+
+
+================================================================================
+4. KEYBOARD SHORTCUTS (CAMERA WINDOW MEIN)
+================================================================================
+  q      = Program band karne ke liye (Quit)
+  d      = Debug boxes aur face angle on/off karne ke liye
+  t      = Track IDs dekhne ke liye
+  s      = State history dekhne ke liye
+  space  = Video pause / resume karne ke liye
+
+================================================================================

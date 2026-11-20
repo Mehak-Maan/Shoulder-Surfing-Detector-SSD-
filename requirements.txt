@@ -1,0 +1,14 @@
+# Runtime (Python 3.11). Do NOT install opencv-python separately: mediapipe already
+# pulls in opencv-contrib-python, and two OpenCV wheels in one environment conflict.
+mediapipe>=0.10.32,<0.11
+numpy>=1.26,<3
+PyYAML>=6.0,<7
+mss>=9.0,<11          # screenshot for the blur overlay (tkinter ships with python.org Python)
+pystray>=0.19,<1      # system-tray icon (optional at runtime: falls back to no tray)
+Pillow>=10.0,<13      # tray icon drawing (also a pystray dependency)
+cryptography>=42.0,<48  # Fernet encryption for opt-in evidence snapshots
+
+# Development / verification
+pytest>=8.0,<10
+mypy>=1.10,<3
+ruff>=0.5,<1

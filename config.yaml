@@ -1,0 +1,125 @@
+# Shoulder Surfing Detector - configuration (defaults shown).
+# Every key is optional; omitted keys fall back to the value written here.
+# Unknown keys are rejected on purpose so typos cannot silently weaken security.
+
+camera:
+  index: 0                    # OpenCV camera index
+  width: 1280                 # capture size; native frame is used for far-field tiles
+  height: 720
+  fps: 30                     # requested capture rate
+  reconnect_interval_s: 2.0   # delay between reconnect attempts after a disconnect
+  read_failure_limit: 15      # consecutive failed reads before the camera counts as lost
+
+detector:
+  model_path: models/blaze_face_short_range.tflite  # MediaPipe Tasks BlazeFace model
+  min_confidence: 0.5         # detector score threshold
+  nms_iou: 0.3                # overlap above which duplicate detections are merged
+  process_width: 640          # near-field pass runs on a frame at most this wide
+  min_face_area_ratio: 0.0025 # face area / frame area; ~3.5 m for a 720p, ~70 deg HFOV webcam
+  max_yaw_deg: 55.0           # faces turned away more than this are not "facing the screen"
+  yaw_min_face_px: 40         # below this face width the yaw estimate is too noisy and is skipped
+  nose_depth_ratio: 0.6       # nose offset / eye distance at 90 deg yaw (heuristic constant)
+  far_field_enabled: true     # extra high-resolution tile passes for faces 2-3.5 m away
+  far_field_cols: 3           # tile grid over the far-field region of interest
+  far_field_rows: 2
+  far_field_overlap: 0.25     # extra tile size, as a fraction of a cell
+  far_field_roi: [0.0, 0.0, 1.0, 0.7]  # x0, y0, x1, y1 (normalized): where heads can appear
+  far_field_period_s: 0.3     # minimum time between two passes over the same tile
+  far_field_max_tiles_per_frame: 2     # caps per-frame cost; spreads tile work over frames
+
+tracker:
+  iou_threshold: 0.2          # IoU needed to match a detection to a track
+  max_center_distance: 1.0    # centroid fallback, in box sizes
+  ttl_s: 0.6                  # a track survives this long without detections (keeps its ID)
+  presence_s: 0.15            # ...but counts as an intruder only this long after its last detection
+  min_hits: 2                 # detections needed before a track is trusted
+  smoothing: 0.5              # box EMA weight of the newest detection (1 = no smoothing)
+
+owner:
+  reacquire_s: 10.0           # without enrollment: owner lost this long -> largest face becomes owner
+  continuity_window_s: 1.0    # a new track this soon after owner loss, in the same place, is the owner
+  continuity_iou: 0.25        # overlap required for that hand-over
+  dedupe_iou: 0.4             # faces overlapping the owner this much are duplicates, not intruders
+
+state:
+  confirm_s: 0.7              # intruder must persist this long before WARNING (debounce)
+  gap_tolerance_s: 0.4        # detection dropouts shorter than this do not reset the streak
+  warning_to_alert_s: 2.0     # WARNING -> ALERT if the intruder is still there
+  alert_to_lock_s: 4.0        # ALERT -> LOCKED if the intruder is still there
+  lock_enabled: true          # false: never escalate beyond ALERT
+  clear_s: 2.0                # continuous clear time before releasing an escalation (hysteresis)
+  recovery_s: 1.0             # extra time in RECOVERY before returning to SECURE
+  cooldown_s: 10.0            # minimum gap between two WARNING toasts (ALERT/LOCKED never suppressed)
+  camera_fault_grace_s: 3.0   # camera unusable this long -> apply camera_fault_policy
+  camera_fault_policy: blur   # warn | blur | lock
+
+actions:
+  toast_enabled: true         # WARNING: desktop notification
+  blur_enabled: true          # ALERT: fullscreen blurred overlay
+  relock_min_interval_s: 30.0 # never lock the OS more often than this (and never while already locked)
+  toast_title: Privacy warning
+  toast_message: Someone is looking at your screen.
+  fault_message: The camera is unavailable, so screen privacy cannot be checked.
+
+overlay:
+  blur_downscale: 4           # blur is computed at 1/N resolution (faster), then scaled back up
+  blur_kernel: 31             # Gaussian kernel size (odd); larger = unreadable text
+  darken: 0.3                 # 0 = none, 0.9 = almost black
+  message: Privacy protection active
+
+health:
+  enabled: true               # detect covered / dark / frozen camera
+  dark_luma_max: 12.0         # mean brightness (0-255) at or below this counts as dark...
+  dark_std_max: 6.0           # ...when contrast (std-dev) is also at or below this
+  frozen_diff_max: 0.05       # mean frame-to-frame change at or below this counts as frozen
+  covered_s: 2.0              # dark this long -> camera treated as covered (camera_fault_policy applies)
+  frozen_s: 3.0               # frozen this long -> camera treated as frozen
+
+privacy:
+  evidence_enabled: false     # OPT-IN: save an encrypted snapshot when ALERT/LOCKED starts
+  evidence_dir: ~/.shoulder_surfing_detector/evidence
+  key_file: ~/.shoulder_surfing_detector/evidence.key  # created on first use; keep it safe
+  evidence_max_files: 20      # oldest snapshots are deleted beyond this
+  jpeg_quality: 80
+
+runtime:
+  headless_fps: 8.0           # processing rate in headless mode (lower = less CPU)
+  tray_enabled: true          # system tray icon (pause / resume / quit)
+  log_file: ~/.shoulder_surfing_detector/ssd.log
+  log_max_bytes: 1000000      # rotate the log at this size
+  log_backups: 3              # rotated files to keep
+  lock_file: ~/.shoulder_surfing_detector/ssd.lock     # single-instance guard
+
+gui:
+  window_name: Shoulder Surfing Detector
+  max_display_width: 960      # the window is downscaled to this width (processing is unaffected)
+
+gaze:                         # attention filter (limit: detector.max_yaw_deg)
+  enabled: true
+  smoothing_alpha: 0.4        # 1 = no smoothing; lower = steadier but slower
+  hysteresis_deg: 8.0         # a face must turn this much back before it counts again
+  use_pitch: false            # also ignore faces looking far up/down (coarse, off by default)
+  max_pitch_deg: 50.0
+  pitch_neutral_ratio: 0.45   # nose position between eyes and mouth for a frontal face
+  pitch_range: 0.3
+
+identity:                     # owner enrollment: run `python main.py --enroll` first
+  enabled: false
+  embedder: lbp               # lbp (built in, weak) or onnx (your own face-embedding model)
+  onnx_model: models/face_embedder.onnx
+  profile_file: ~/.shoulder_surfing_detector/owner.profile.enc  # encrypted with privacy.key_file
+  enroll_samples: 20
+  enroll_interval_s: 0.5
+  enroll_timeout_s: 90.0
+  enroll_max_yaw_deg: 25.0
+  enroll_min_face_px: 80
+  min_embed_px: 48            # smaller faces cannot be verified and are never the owner
+  verify_period_s: 1.0
+  min_samples: 3
+  window: 5
+  max_embeds_per_frame: 2
+  top_k: 3
+  threshold_floor: 0.5
+  threshold_ceiling: 0.95
+  threshold_margin: 0.1       # threshold = clip(mean leave-one-out similarity - margin, floor, ceiling)
+  stay_margin: 0.05           # an accepted owner must drop this far below the threshold to be rejected
