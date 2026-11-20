@@ -2,6 +2,8 @@
           SHOULDER SURFING DETECTOR (SSD) - COMPLETE GUIDE & INSTRUCTIONS
 ================================================================================
 
+GitHub Repository: https://github.com/Mehak-Maan/Shoulder-Surfing-Detector-SSD-
+
 Yeh guide aapko batayegi ke:
 1. Owner Face kaise Register (Enroll) karna hai.
 2. 1-Click se app kaise chalani hai.

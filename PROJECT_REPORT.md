@@ -4,6 +4,7 @@
 **System Target:** Windows (Primary), Linux, macOS  
 **Core Technologies:** Python 3.11, MediaPipe Tasks (BlazeFace Short-Range), OpenCV, NumPy, Cryptography (Fernet)  
 **Execution Profile:** CPU-Only, Fully Offline, Low-Latency Real-Time  
+**GitHub Repository:** [https://github.com/Mehak-Maan/Shoulder-Surfing-Detector-SSD-](https://github.com/Mehak-Maan/Shoulder-Surfing-Detector-SSD-)  
 
 ---
 

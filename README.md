@@ -1,5 +1,7 @@
 # Shoulder Surfing Detector
 
+**GitHub Repository:** [https://github.com/Mehak-Maan/Shoulder-Surfing-Detector-SSD-](https://github.com/Mehak-Maan/Shoulder-Surfing-Detector-SSD-)
+
 Real-time, **fully offline**, **CPU-only** protection against people looking at your screen from behind.
 A webcam watches for additional faces; escalation is toast → blur overlay → OS lock.
 
